@@ -56,9 +56,29 @@ $ docker-compose -f docker/docker-compose.yml down
 ## HATEOAS
 With HATEOAS, a client interacts with a network application whose application servers provide information dynamically through hypermedia. A REST client needs little to no prior knowledge about how to interact with an application or server beyond a generic understanding of hypermedia.
 * Pagination provided by HATEOAS for this project.
-It means, You can go for the first, next, previous, and last page by reading the link of them in the response of the findall request.
+It means, You can go for the first, next, previous, and last page by reading the link of them in the response of the findall request. you can see them below.
 * For simplicity I provide 3 different HTTP Hearer to client know about pages and the count of the total stocks.
 * Note: provided `hateoas.disabled` variable in properties file. You can disable HATEOAS links this way hateoas.disabled: true. 
+
+```json
+{
+  "_links": {
+    "first": {
+      "href": "http://localhost:8080/api/stocks?page=0&size=2"
+    },
+    "last": {
+      "href": "http://localhost:8080/api/stocks?page=2&size=2"
+    },
+    "next": {
+      "href": "http://localhost:8080/api/stocks?page=2&size=2"
+    },
+    "prev": {
+      "href": "http://localhost:8080/api/stocks?page=0&size=2"
+    }
+  }
+}
+```
+
 
 ## ResponseDto
 There is a ResponseDto object. This object is our response. This object has a List<T> payload.
@@ -85,7 +105,7 @@ Provided a Global Exception handler to help handle exceptions in an easy way.
 In `ResponseDto` there is a field with name `error_code` you can see error code of each request.
 Global Exception, put the error_code into `ResponseDto` base the condition.
 Provided a `message` to show the text result of request.
-If `log debug mode` is activated, you can see the `details` of the error in the response.
+* Note: If `log debug mode` is activated, you can see the `details` of the error in the response. Disabel Debug mode for production. by default for production is disabled.
 The sample response of a result with eror at below:
 
 ```json

@@ -39,21 +39,21 @@ public class StockServiceImpl implements StockService {
     @Override
     @Transactional(readOnly = true)
     public Page<StockDto> findAll(Pageable pageable) {
-        log.debug("Request to get all Stocks");
+        log.debug("#Request to get all Stocks");
         return stockRepository.findAll(pageable).map(stockMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public StockDto findOne(Long id) throws StockNotFoundException {
-        log.debug("Request to get Stock : {}", id);
+        log.debug("#Request to get Stock : {}", id);
         Optional<Stock> stockOptional= stockRepository.findById(id);
         return  stockOptional.map(stockMapper::toDto).orElseThrow(()->new StockNotFoundException(id+ ""));
     }
 
     @Override
     public StockDto save(StockDto stockDto) {
-        log.debug("Request to save Stock : {}", stockDto);
+        log.debug("#Request to save Stock : {}", stockDto);
         if (stockDto.getId() != null) {
             throw new BadRequestException("ID exist. A new stock cannot already have an ID! id is: " + stockDto.getId());
         }
@@ -65,7 +65,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public StockDto update(StockDto stockDto) {
-        log.debug("Request to save Stock : {}", stockDto);
+        log.debug("#Request to save Stock : {}", stockDto);
         if (stockDto.getId() == null) {
             throw new BadRequestException("#Invalid id! id is null! Dto must have an id.");
         }
@@ -80,7 +80,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public StockDto partialUpdate(StockDto stockDto) {
-        log.debug("Request to partially update Stock : {}", stockDto);
+        log.debug("#Request to partially update Stock : {}", stockDto);
 
         if (stockDto.getId() == null) {
             throw new BadRequestException("id is null! Invalid id! Dto must have an id.");
@@ -101,7 +101,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public void delete(Long id) {
-        log.debug("Request to delete Stock : {}", id);
+        log.debug("#Request to delete Stock : {}", id);
         stockRepository.deleteById(id);
     }
 }
