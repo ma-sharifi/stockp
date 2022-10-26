@@ -1,0 +1,156 @@
+package com.example.stockp.controller;
+
+
+import com.example.stockp.EndToEndTest;
+import com.example.stockp.entity.Stock;
+import com.example.stockp.repository.StockRepository;
+import com.example.stockp.service.dto.ResponseDto;
+import com.example.stockp.service.dto.StockDto;
+import com.example.stockp.service.mapper.StockMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.*;
+
+import javax.annotation.PostConstruct;
+import java.util.Collections;
+
+import static com.example.stockp.util.ConvertorUtil.toResponseDto;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * @author Mahdi Sharifi
+ */
+@EndToEndTest
+@DisplayName("Stock controller End to End test")
+class StockControllerE2ETest {
+
+
+    private static final String NAME = "Stock#1";
+
+    private static final Long CURRENT_PRICE = 1L;
+
+    private static final String ENTITY_API_URL = "/api/stocks";
+    private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
+
+    @Autowired
+    private StockRepository stockRepository;
+
+    @Autowired
+    private StockMapper stockMapper;
+
+    private String uri;
+
+    @LocalServerPort
+    private int port;
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    /**
+     * Create an entity for this test.
+     */
+    public Stock createEntity() {
+        Stock stock = new Stock()
+                .name(NAME)
+                .currentPrice(CURRENT_PRICE);
+        return stock;
+    }
+
+    @PostConstruct
+    public void init() {
+        uri = "http://localhost:" + port;
+    }
+
+    @Test
+    void contextLoads() {
+        assertThat(restTemplate).isNotNull();
+    }
+
+
+    @Test
+    void shouldCreateStockThenReturnStockDto_whenCreateIsCalled_thenGetIsCalled() {
+        // Create entity
+        Stock stock = createEntity();
+        StockDto dto = stockMapper.toDto(stock);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<StockDto> entity = new HttpEntity<>(dto, headers);
+        ResponseEntity<ResponseDto> responseEntityCreate = this.restTemplate.exchange(uri + ENTITY_API_URL, HttpMethod.POST, entity, ResponseDto.class);
+
+        //Test Created successfully
+        String urlCreatedObject = responseEntityCreate.getHeaders().get("Location").get(0);//get the location of saved stock-> /v1/stocks/6
+        assertEquals(HttpStatus.CREATED, responseEntityCreate.getStatusCode());
+
+        // Get saved entity
+        HttpEntity<String> entityGet = new HttpEntity<>(headers);
+        ResponseEntity<StockDto> responseEntity = this.restTemplate.exchange(urlCreatedObject, HttpMethod.GET, entityGet, StockDto.class);
+
+        //Test Fetch saved entity successfully
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnNoContent_whenCreateIsCalled_thenDeleteIsCalled() {
+        // Create entity
+        Stock stock = createEntity();
+        stock.setName("Dummy data for test delete");
+        StockDto dto = stockMapper.toDto(stock);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<StockDto> entity = new HttpEntity<>(dto, headers);
+        ResponseEntity<ResponseDto> responseEntityCreate = this.restTemplate.exchange(uri + ENTITY_API_URL, HttpMethod.POST, entity, ResponseDto.class);
+
+        //Test Created successfully
+        String urlCreatedObject = responseEntityCreate.getHeaders().get("Location").get(0);//get the location of saved stock-> /v1/stocks/6
+        assertEquals(HttpStatus.CREATED, responseEntityCreate.getStatusCode());
+
+        // Get saved Stock
+        HttpEntity<String> entityGet = new HttpEntity<>(headers);
+        ResponseEntity<StockDto> responseEntity = this.restTemplate.exchange(urlCreatedObject, HttpMethod.DELETE, entityGet, StockDto.class);
+
+        //Test Fetch saved Stock successfully
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnStock_whenCreateIsCalled_thenUpdateIsCalled() {
+        // Create Stock
+        Stock stock = createEntity();
+        stock.setName("Dummy data for test update");
+        StockDto dto = stockMapper.toDto(stock);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<StockDto> entity = new HttpEntity<>(dto, headers);
+        ResponseEntity<String> responseEntityCreated = this.restTemplate.exchange(uri + ENTITY_API_URL, HttpMethod.POST, entity, String.class);
+
+        //Test Created successfully
+        String urlCreatedObject = responseEntityCreated.getHeaders().get("Location").get(0);//get the location of saved stock-> /v1/stocks/6
+        assertEquals(HttpStatus.CREATED, responseEntityCreated.getStatusCode());
+
+        ResponseDto<StockDto> responseDtoStockDto = toResponseDto(responseEntityCreated.getBody());
+
+        StockDto stockDtoCreated = responseDtoStockDto.getPayload().get(0);
+        assertEquals("Dummy data for test update", stockDtoCreated.getName());
+
+        stockDtoCreated.setName("Updated title Dummy data for test update");
+        stockDtoCreated.setCurrentPrice(10L);
+
+        // Get saved Stock
+        HttpEntity<StockDto> entityPut = new HttpEntity<>(stockDtoCreated, headers);
+        ResponseEntity<String> responseEntityUpdated = this.restTemplate.exchange(urlCreatedObject, HttpMethod.PUT, entityPut, String.class);
+
+        //Test updated Stock successfully
+        assertEquals(HttpStatus.OK, responseEntityUpdated.getStatusCode());
+
+        StockDto dtoUpdated = toResponseDto(responseEntityUpdated.getBody()).getPayload().get(0);
+        assertEquals(stockDtoCreated.getId(), dtoUpdated.getId());
+        assertEquals("Updated title Dummy data for test update", dtoUpdated.getName());
+        assertEquals(10L, dtoUpdated.getCurrentPrice());
+    }
+
+
+}

@@ -1,7 +1,6 @@
 package com.example.stockp.controller;
 
 import com.example.stockp.IntegrationTest;
-import com.example.stockp.TestUtil;
 import com.example.stockp.entity.Stock;
 import com.example.stockp.exception.BadRequestException;
 import com.example.stockp.exception.StockNotFoundException;
@@ -11,7 +10,6 @@ import com.example.stockp.service.dto.StockDto;
 import com.example.stockp.service.mapper.StockMapper;
 import com.example.stockp.util.ConvertorUtil;
 import com.google.gson.Gson;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,7 +20,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +42,6 @@ class StockEndpointImplIT {
     private static final String PARTIAL_UPDATED_NAME = "Partial Updated Stock#1";
 
     private static final Long CURRENT_PRICE = 1L;
-    private static final Long UPDATED_CURRENT_PRICE = 2L;
 
     private static final String ENTITY_API_URL = "/api/stocks";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -105,13 +101,14 @@ class StockEndpointImplIT {
         // Validate the test by size database
         assertThat(databaseSizeAfterCreate).isEqualTo(databaseSizeBeforeCreate + 1);
     }
+
     @Test
     void shouldCThrowDataIntegrityViolationException_whenCreateRecipeIsCalled2TimesWithTheSameStockname() throws Exception {
         Stock stock = createEntity();
         stock.setName("Stock#5-" + ThreadLocalRandom.current().nextInt(100));
         // Create the Stock
         StockDto stockDtoForSave = stockMapper.toDto(stock);
-         mockMvc
+        mockMvc
                 .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON)
                         .content(new Gson().toJson(stockDtoForSave)))
                 .andExpect(status().isCreated())
@@ -155,7 +152,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldReturnAllStocks_whenGetAllStockIsCalled() throws Exception {
         // Initialize the database
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         stock.setName("Stock#2-" + ThreadLocalRandom.current().nextInt(1000));
         stockRepository.saveAndFlush(stock);
         long count = stockRepository.count();
@@ -187,7 +184,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldFindOne_whenGetByIdIsCalled() throws Exception {
         // Initialize the database
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         stock.setName("Stock#3-" + ThreadLocalRandom.current().nextInt(1000));
         stockRepository.saveAndFlush(stock);
 
@@ -253,7 +250,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldGetBadRequestUpdateStock_whenNonExistingStockUpdateIsCalled() throws Exception {
         // Create the Stock
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         StockDto expectedStockDto = stockMapper.toDto(stock);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
@@ -271,7 +268,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldGetBadRequestInPutRequest_whenStockIdIsNullUpdateIsCalled() throws Exception {
         // Create the Stock
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         StockDto expectedStockDto = stockMapper.toDto(stock);
         stockRepository.save(stock);
 
@@ -335,7 +332,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldGetBadRequestPartialUpdate_whenNonExistingStockPartialUpdateIsCalled() throws Exception {
         // Create the Stock
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         StockDto expectedStockDto = stockMapper.toDto(stock);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
@@ -354,7 +351,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldGetBadRequestInPatchRequest_whenStockIdIsNullPartialUpdateIsCalled() throws Exception {
         // Create the Stock
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         StockDto expectedStockDto = stockMapper.toDto(stock);
         stockRepository.save(stock);
 
@@ -372,7 +369,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldDeleteStock_whenDeleteIsCalled() throws Exception {
         // Initialize the database
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         stockRepository.saveAndFlush(stock);
 
         long databaseSizeBeforeDelete = stockRepository.count();
@@ -393,7 +390,9 @@ class StockEndpointImplIT {
         // Get the stock
         mockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> {assertTrue(result.getResolvedException() instanceof StockNotFoundException);});
+                .andExpect(result -> {
+                    assertTrue(result.getResolvedException() instanceof StockNotFoundException);
+                });
     }
 
 
@@ -409,7 +408,7 @@ class StockEndpointImplIT {
     @Transactional
     void shouldGetBadRequest_whenCreateStockWithExistingId() throws Exception {
         // Create the Stock with an existing ID
-        Stock stock=createEntity();
+        Stock stock = createEntity();
         stock.setId(1L);
         StockDto expectedStockDto = stockMapper.toDto(stock);
 

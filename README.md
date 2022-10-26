@@ -55,22 +55,23 @@ $ docker-compose -f docker/docker-compose.yml down
 
 ## HATEOAS
 With HATEOAS, a client interacts with a network application whose application servers provide information dynamically through hypermedia. A REST client needs little to no prior knowledge about how to interact with an application or server beyond a generic understanding of hypermedia.
-Pagination provided by HATEOAS for this project.
+* Pagination provided by HATEOAS for this project.
 It means, You can go for the first, next, previous, and last page by reading the link of them in the response of the findall request.
-For simplicity I provide 3 different HTTP Hearer to client know about pages and the count of the total stocks.
+* For simplicity I provide 3 different HTTP Hearer to client know about pages and the count of the total stocks.
 * Note: provided `hateoas.disabled` variable in properties file. You can disable HATEOAS links this way hateoas.disabled: true. 
 
 ## ResponseDto
-There is a ResponseDto object. our response consist of this object. This object has a List<T> payload.
+There is a ResponseDto object. This object is our response. This object has a List<T> payload.
 Client **MUST** find the body of the response here. Due to simplicity for client, payload is always a list. As a result, client just need process this field.
 We know an object is an array with a length of one.
 
 ## HTTP Status
+* Note: provided different HTTP Header for different situation.
 1. If the result of `GET` (stocks/1,/stocks) be success HTTP Status 200 and error_code 0.
-2. If the result of POST (create) be success, the response will contain HTTP Status 201 and error_code 0 and a Location with the url of the newly created entity in header (HTTP Header-> Location:/api/stocks/1).
+2. If the result of `POST` (create) be success, the response will contain HTTP Status 201 and error_code 0 and a Location with the url of the newly created entity in header (HTTP Header-> Location:/api/stocks/1).
 3. If something be not normal from the client side a HTTP Status 400 (Bad Request) will be return.
 4. If the entity was not found HTTP Status will be 404 (Not Found).
-5. If something unhandle accoured in server side the HTTP Status will be 500.
+5. If something unhandled occurred on the server-side the HTTP Status would be 500.
 
 ## Provided 4 different ways for test the application:
 1. [Swagger](http://localhost:8080/swagger-ui/index.html)
@@ -113,7 +114,7 @@ I used MapStruct for mapping entity to Dto and vice versa. Mapstruct is compile 
 * There is one instance of the application running at the moment. 
 
 ## Test Coverage
-Provided 29 tests(Unit test, Integration test)
+Provided 29 tests(Unit test, Integration test, End to End test)
 * 100% Class
 * 90% Method
 * 87% Line
