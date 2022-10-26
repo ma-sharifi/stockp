@@ -1,0 +1,44 @@
+version: '2.1'
+services:
+  database:
+    image: mariadb:latest
+    container_name: mariadb-3307
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - db_conf:/etc/mysql
+    environment:
+      MYSQL_DATABASE: stockp
+      MYSQL_ROOT_PASSWORD: S3cret
+      MYSQL_PASSWORD: An0thrS3crt
+      MYSQL_USER: citizix_user
+    networks:
+      backend:
+        aliases:
+          - "database"
+    healthcheck:
+      test: "/etc/init.d/mysql status"
+      interval: 20s
+      timeout: 10s
+      retries: 5
+  stockp:
+    image: picher/stockp:2022.1.0-SNAPSHOT
+    container_name: stockp
+    environment:
+      - "SPRING_PROFILES_ACTIVE=prod"
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      backend:
+        aliases:
+          - "stockp"
+networks:
+  backend:
+    driver: bridge
+volumes:
+  db_data:
+  db_conf:

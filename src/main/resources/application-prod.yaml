@@ -1,0 +1,25 @@
+environement:
+  property: I AM THE DEFAULT
+
+logging:
+  level:
+    ROOT: INFO
+    com.example: DEBUG
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: stockp
+  datasource:
+    url: jdbc:mariadb://localhost:3307/stockp
+    username: root
+    password: S3cret
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+
+
